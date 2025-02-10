@@ -10,7 +10,7 @@ import {
     SanityClient,
 } from "@sanity/client"
 import { SchemaTypeDefinition } from "sanity";
-import { createSanityWorkflow, ReturnSanityWorkflow, sanityWorkflows, StepType } from "src/workflows/sanity-sync-products";
+import { createSanityWorkflow, ReturnSanityWorkflow, sanityWorkflows, StepType } from "../../workflows/sanity-sync-products";
 
 
 const SyncDocumentTypes = {

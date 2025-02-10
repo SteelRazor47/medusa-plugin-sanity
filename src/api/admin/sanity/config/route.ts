@@ -1,8 +1,8 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
 import { MedusaError } from "@medusajs/framework/utils"
 import { schema } from "../../../../admin/lib/sanity/schemaTypes"
-import { SANITY_MODULE } from "src/modules/sanity"
-import SanityModuleService from "src/modules/sanity/service"
+import { SANITY_MODULE } from "../../../../modules/sanity"
+import SanityModuleService from "../../../../modules/sanity/service"
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     const sanityModule = req.scope.resolve(SANITY_MODULE) as SanityModuleService
