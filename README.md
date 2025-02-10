@@ -8,57 +8,60 @@
   </a>
 </p>
 <h1 align="center">
-  Medusa Plugin Starter
+  Medusa Plugin Sanity
 </h1>
 
-<h4 align="center">
-  <a href="https://docs.medusajs.com">Documentation</a> |
-  <a href="https://www.medusajs.com">Website</a>
-</h4>
-
-<p align="center">
-  Building blocks for digital commerce
-</p>
-<p align="center">
-  <a href="https://github.com/medusajs/medusa/blob/master/CONTRIBUTING.md">
-    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" alt="PRs welcome!" />
-  </a>
-    <a href="https://www.producthunt.com/posts/medusa"><img src="https://img.shields.io/badge/Product%20Hunt-%231%20Product%20of%20the%20Day-%23DA552E" alt="Product Hunt"></a>
-  <a href="https://discord.gg/xpCwq3Kfn8">
-    <img src="https://img.shields.io/badge/chat-on%20discord-7289DA.svg" alt="Discord Chat" />
-  </a>
-  <a href="https://twitter.com/intent/follow?screen_name=medusajs">
-    <img src="https://img.shields.io/twitter/follow/medusajs.svg?label=Follow%20@medusajs" alt="Follow @medusajs" />
-  </a>
-</p>
+Adds Sanity CMS integration to a Medusa V2 backend, closely following the Medusa implementation [guide](https://docs.medusajs.com/resources/integrations/guides/sanity). The following features are available:
+- Embedded Sanity Studio
+- Sync-all admin page
+- Support for redefining/adding schemas for any model
+- Built-in support for the following Medusa models, including admin widgets and subscribers for manual and automatic sync:
+  - Product: Title, Description
+  - Category: Name
+  - Collection: Title
+  - Shipping Option: Name
 
 ## Compatibility
 
-This starter is compatible with versions >= 2.4.0 of `@medusajs/medusa`. 
+This plugin is compatible with versions >= 2.4.0 of `@medusajs/medusa`. 
 
-## Getting Started
+## Plugin options
 
-Visit the [Quickstart Guide](https://docs.medusajs.com/learn/installation) to set up a server.
+```
+import { SanityPluginOptions } from "medusa-plugin-sanity/modules/sanity"
 
-Visit the [Plugins documentation](https://docs.medusajs.com/learn/fundamentals/plugins) to learn more about plugins and how to create them.
 
-Visit the [Docs](https://docs.medusajs.com/learn/installation#get-started) to learn more about our system requirements.
+{
+    resolve: "medusa-plugin-sanity",
+    options: {
+      api_token: process.env.SANITY_API_TOKEN,
+      project_id: process.env.SANITY_PROJECT_ID,
+      dataset: "development",
+      backend_url: process.env.MEDUSA_BACKEND_URL,
+      api_version: "2025-01-01",
+      extra_schemas: {
+        "custom-model": {
+          schema: ...,
+          step: ...,
+          transformForCreate: ...,
+          transformForUpdate: ...,
+        }
+      },
+    } as SanityPluginOptions,
+  },
 
-## What is Medusa
+```
 
-Medusa is a set of commerce modules and tools that allow you to build rich, reliable, and performant commerce applications without reinventing core commerce logic. The modules can be customized and used to build advanced ecommerce stores, marketplaces, or any product that needs foundational commerce primitives. All modules are open-source and freely available on npm.
+## Extra schemas
 
-Learn more about [Medusa’s architecture](https://docs.medusajs.com/learn/introduction/architecture) and [commerce modules](https://docs.medusajs.com/learn/fundamentals/modules/commerce-modules) in the Docs.
+To implement additional schemas, you MUST define a link from your model to the Sanity module([example](src/admin/lib/sanity/schemaTypes/documents/category.ts)).
+Optionally you can define subscribers([example](src/subscribers/sanity-category-sync.ts)) and admin widgets([example](src/admin/widgets/sanity-category.tsx)).
 
-## Community & Contributions
+The following is an example of the properties that need to be added to the plugin options for a custom schema:
 
-The community and core team are available in [GitHub Discussions](https://github.com/medusajs/medusa/discussions), where you can ask for support, discuss roadmap, and share ideas.
+[template](TEMPLATE.md)
 
-Join our [Discord server](https://discord.com/invite/medusajs) to meet other community members.
 
-## Other channels
+## Known issues
 
-- [GitHub Issues](https://github.com/medusajs/medusa/issues)
-- [Twitter](https://twitter.com/medusajs)
-- [LinkedIn](https://www.linkedin.com/company/medusajs)
-- [Medusa Blog](https://medusajs.com/blog/)
+- Studio links and refreshes do not work, Medusa at the moment doesn't support catch-all routes in admin pages
