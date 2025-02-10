@@ -9,6 +9,8 @@ import {
     FirstDocumentMutationOptions,
     SanityClient,
 } from "@sanity/client"
+import { SchemaTypeDefinition } from "sanity";
+import { createSanityWorkflow, ReturnSanityWorkflow, sanityWorkflows, StepType } from "src/workflows/sanity-sync-products";
 
 
 const SyncDocumentTypes = {
@@ -17,16 +19,23 @@ const SyncDocumentTypes = {
     COLLECTION: "collection"
 } as const
 
-export type SyncDocumentTypes =
+type SyncDocumentTypes =
     (typeof SyncDocumentTypes)[keyof typeof SyncDocumentTypes];
 
-type ModuleOptions = {
+export type ModuleOptions = {
     api_token: string;
     project_id: string;
+    dataset: string;
     api_version: string;
-    dataset: "production" | "development";
-    type_map?: Record<SyncDocumentTypes, string>;
-    studio_url?: string;
+    backend_url: string;
+    extra_schemas?: {
+        [type: string]: {
+            schema: SchemaTypeDefinition;
+            step: StepType,
+            transformForCreate: (data: any) => any;
+            transformForUpdate: (data: any) => any;
+        }
+    }
 }
 
 type SyncDocumentInputs<T> =
@@ -45,8 +54,9 @@ type InjectedDependencies = {
 };
 
 class SanityModuleService {
+    private options: ModuleOptions
+    private workflows: Record<string, ReturnSanityWorkflow>
     private client: SanityClient
-    private studioUrl?: string
     private logger: Logger
 
     private typeMap: Record<SyncDocumentTypes, string>
@@ -62,34 +72,52 @@ class SanityModuleService {
             dataset: options.dataset,
             token: options.api_token,
         })
+        this.options = options
+        const extra_workflows = Object.fromEntries(Object.entries(options.extra_schemas ?? {}).map(([type, s]) => {
+            return [type, createSanityWorkflow(type, s.step)]
+        }))
+
+        this.workflows = Object.assign({}, sanityWorkflows, extra_workflows)
+
         this.logger = logger
 
-        this.logger.info("Connected to Sanity")
 
-        this.studioUrl = options.studio_url
+        this.typeMap = {
+            [SyncDocumentTypes.PRODUCT]: "product",
+            [SyncDocumentTypes.CATEGORY]: "category",
+            [SyncDocumentTypes.COLLECTION]: "collection",
+        }
 
-        this.typeMap = Object.assign(
-            {},
-            {
-                [SyncDocumentTypes.PRODUCT]: "product",
-                [SyncDocumentTypes.CATEGORY]: "category",
-                [SyncDocumentTypes.COLLECTION]: "collection",
-            },
-            options.type_map || {}
-        )
+        const createMap = Object.fromEntries(Object.entries(options.extra_schemas ?? {}).map(([type, s]) => {
+            return [type, s.transformForCreate]
+        }))
 
-        this.createTransformationMap = {
+        const updateMap = Object.fromEntries(Object.entries(options.extra_schemas ?? {}).map(([type, s]) => {
+            return [type, s.transformForUpdate]
+        }))
+
+
+        this.createTransformationMap = Object.assign({}, {
             [SyncDocumentTypes.PRODUCT]: this.transformProductForCreate,
             [SyncDocumentTypes.CATEGORY]: this.transformCategoryForCreate,
             [SyncDocumentTypes.COLLECTION]: this.transformCollectionForCreate,
-        }
+        }, createMap)
 
-        this.updateTransformationMap = {
+        this.updateTransformationMap = Object.assign({}, {
             [SyncDocumentTypes.PRODUCT]: this.transformProductForUpdate,
             [SyncDocumentTypes.CATEGORY]: this.transformCategoryForUpdate,
             [SyncDocumentTypes.COLLECTION]: this.transformCollectionForUpdate,
-        }
+        }, updateMap)
 
+        this.logger.info("Connected to Sanity")
+    }
+
+    getOptions() {
+        return this.options
+    }
+
+    getWorkflows() {
+        return this.workflows
     }
 
     private transformProductForCreate = (product: ProductDTO) => {
@@ -199,10 +227,10 @@ class SanityModuleService {
         config: { explicit_type?: boolean } = {}
     ) {
         const resolvedType = config.explicit_type ? type : this.typeMap[type]
-        if (!this.studioUrl) {
-            throw new Error("No studio URL provided")
+        if (!this.options.backend_url) {
+            throw new Error("No backend URL provided")
         }
-        return `${this.studioUrl}/structure/${resolvedType};${id}`
+        return `${this.options.backend_url}/app/studio/structure/${resolvedType};${id}`
     }
 
 

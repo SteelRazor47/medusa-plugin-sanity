@@ -2,12 +2,13 @@ import {
     MedusaRequest,
     MedusaResponse,
 } from "@medusajs/framework/http"
-import {
-    sanityWorkflows,
-} from "src/workflows/sanity-sync-products"
+import { SANITY_MODULE } from "../../../../../../../../src/modules/sanity"
+import SanityModuleService from "../../../../../../../../src/modules/sanity/service"
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
-    const { transaction } = await sanityWorkflows[req.params.type](req.scope)
+    const sanityModule = req.scope.resolve(SANITY_MODULE) as SanityModuleService
+    const workflows = sanityModule.getWorkflows()
+    const { transaction } = await workflows[req.params.type](req.scope)
         .run({
             input: { ids: [req.params.id] },
         })

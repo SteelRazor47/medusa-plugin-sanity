@@ -8,11 +8,11 @@ import {
 } from "@tanstack/react-query"
 import { sdk } from "../lib/sdk"
 import { FetchError } from "@medusajs/js-sdk"
-import { SyncDocumentTypes } from "../../modules/sanity/service"
+import { SchemaPluginOptions } from "sanity"
 
 export const useTriggerSanityEntitySync = (
     id: string,
-    type: SyncDocumentTypes,
+    type: string,
     options?: UseMutationOptions
 ) => {
     const queryClient = useQueryClient()
@@ -113,4 +113,35 @@ export const useSanitySyncs = (
     })
 
     return { ...data, ...rest }
+}
+
+export type PluginOptions = { projectId: string, dataset: string, apiVersion: string, schema: SchemaPluginOptions }
+export const usePluginConfig = (
+    query?: Record<any, any>,
+    options?: Omit<
+        UseQueryOptions<
+            Record<any, any>,
+            FetchError,
+            PluginOptions,
+            QueryKey
+        >,
+        "queryKey" | "queryFn"
+    >
+) => {
+    const fetchSanityConfig = async (query?: Record<any, any>) => {
+        return await sdk.client.fetch<PluginOptions>(
+            `/admin/sanity/config`,
+            {
+                query,
+            }
+        )
+    }
+
+    const { data, ...rest } = useQuery({
+        queryFn: async () => fetchSanityConfig(query),
+        queryKey: [`sanity_config`],
+        ...options,
+    })
+
+    return { data, ...rest }
 }

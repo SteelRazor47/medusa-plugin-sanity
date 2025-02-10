@@ -5,6 +5,7 @@ import type {
 import {
     sanityWorkflows,
 } from "../workflows/sanity-sync-products"
+import { ProductEvents } from "@medusajs/framework/utils"
 
 export default async function upsertSanityProduct({
     event: { data },
@@ -18,5 +19,5 @@ export default async function upsertSanityProduct({
 }
 
 export const config: SubscriberConfig = {
-    event: ["product.created", "product.updated"],
+    event: [ProductEvents.PRODUCT_CREATED, ProductEvents.PRODUCT_UPDATED],
 }

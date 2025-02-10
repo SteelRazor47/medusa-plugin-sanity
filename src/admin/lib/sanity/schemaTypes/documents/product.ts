@@ -1,6 +1,9 @@
 import { DocumentDefinition } from "sanity"
 
 const productSchema: DocumentDefinition = {
+    type: "document",
+    name: "product",
+    title: "Product Page",
     fields: [
         {
             name: "title",
@@ -42,14 +45,11 @@ const productSchema: DocumentDefinition = {
             type: "object",
         },
     ],
-    name: "product",
     preview: {
         select: {
             title: "title",
         },
     },
-    title: "Product Page",
-    type: "document",
     groups: [{
         default: true,
         name: "content",

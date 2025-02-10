@@ -5,7 +5,4 @@ import collectionSchema from "./documents/collection"
 
 export const schema: SchemaPluginOptions = {
   types: [productSchema, categorySchema, collectionSchema],
-  templates: (templates) => templates.filter(
-    (template) => template.schemaType !== "product"
-  ),
 }

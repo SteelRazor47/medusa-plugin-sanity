@@ -1,26 +1,41 @@
-/**
- * This route is responsible for the built-in authoring environment using Sanity Studio.
- * All routes under your studio path is handled by this file using Next.js' catch-all routes:
- * https://nextjs.org/docs/routing/dynamic-routes#catch-all-routes
- *
- * You can learn more about the next-sanity package here:
- * https://github.com/sanity-io/next-sanity
- */
-
-import { NextStudio } from 'next-sanity/studio'
-import sanityConfig from '../../../../sanity.config'
 import { defineRouteConfig } from '@medusajs/admin-sdk'
+import { usePluginConfig } from '../../hooks/sanity'
+import { defineConfig, Studio } from 'sanity'
+import { visionTool } from '@sanity/vision'
+import { StructureResolver, structureTool } from 'sanity/structure'
 import { Sanity } from '@medusajs/icons'
+import { useMemo } from 'react'
 
-// export const dynamic = 'force-static'
+const structure: StructureResolver = (S) =>
+    S.list()
+        .title('Content')
+        .items(S.documentTypeListItems())
 
-// export { metadata, viewport } from 'next-sanity/studio'
+export default function StudioPage() {
+    const { data } = usePluginConfig()
+
+    const sanityConfig = useMemo(() => !data ? null : defineConfig({
+        basePath: '/app/studio',
+        projectId: data.projectId,
+        dataset: data.dataset,
+        schema: data.schema,
+        plugins: [
+            structureTool({ structure }),
+            visionTool({ defaultApiVersion: data.apiVersion }),
+        ],
+    }), [data])
+
+    if (!sanityConfig)
+        return <div>Loading...</div>
+
+    return (
+        <div className="h-[100vh]">
+            <Studio config={sanityConfig} />
+        </div>
+    )
+}
 
 export const config = defineRouteConfig({
     label: "Sanity - Studio",
     icon: Sanity,
 })
-
-export default function StudioPage() {
-    return <NextStudio config={sanityConfig} />
-}

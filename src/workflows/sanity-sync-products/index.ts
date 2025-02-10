@@ -1,20 +1,19 @@
 import {
     createWorkflow,
-    ReturnWorkflow,
     StepFunction,
     WorkflowResponse,
 } from "@medusajs/framework/workflows-sdk"
 import { syncCategoryStep, syncCollectionStep, syncProductStep, SyncStepInput } from "./steps/sync"
 
-export type SanitySyncWorkflowInput = {
+type SanitySyncWorkflowInput = {
     ids?: string[];
 };
 
-export type SanityWorkflowType = "product" | "category" | "collection"
+export type StepType = StepFunction<SyncStepInput, { total: number; }>
 
-type StepType = StepFunction<SyncStepInput, { total: number; }>
+export type ReturnSanityWorkflow = ReturnType<typeof createSanityWorkflow>
 
-const createSanityWorkflow = (type: SanityWorkflowType, step: StepType) => createWorkflow(
+export const createSanityWorkflow = (type: string, step: StepType) => createWorkflow(
     { name: `sanity-sync-${type}`, retentionTime: 10000 },
     function (input: SanitySyncWorkflowInput) {
         const result = step(input)
@@ -23,7 +22,7 @@ const createSanityWorkflow = (type: SanityWorkflowType, step: StepType) => creat
     }
 )
 
-export const sanityWorkflows: Record<SanityWorkflowType, ReturnType<typeof createSanityWorkflow>> = {
+export const sanityWorkflows: Record<string, ReturnSanityWorkflow> = {
     product: createSanityWorkflow("product", syncProductStep),
     category: createSanityWorkflow("category", syncCategoryStep),
     collection: createSanityWorkflow("collection", syncCollectionStep)
