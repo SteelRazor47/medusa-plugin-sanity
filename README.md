@@ -21,36 +21,47 @@ Adds Sanity CMS integration to a Medusa V2 backend, closely following the Medusa
   - Collection: Title
   - Shipping Option: Name
 
-## Compatibility
-
-This plugin is compatible with versions >= 2.4.0 of `@medusajs/medusa`. 
-
-## Plugin options
+## Required configs 
+### Plugin options
 
 ```
-import { SanityPluginOptions } from "medusa-plugin-sanity/modules/sanity"
+import { SanityPluginOptions, sanityOptimizeDeps } from "medusa-plugin-sanity/modules/sanity"
 
+module.exports = defineConfig({
+  ...
 
-{
-    resolve: "medusa-plugin-sanity",
-    options: {
-      api_token: process.env.SANITY_API_TOKEN,
-      project_id: process.env.SANITY_PROJECT_ID,
-      dataset: "development",
-      backend_url: process.env.MEDUSA_BACKEND_URL,
-      api_version: "2025-01-01",
-      extra_schemas: {
-        "custom-model": {
-          schema: ...,
-          step: ...,
-          transformForCreate: ...,
-          transformForUpdate: ...,
-        }
-      },
-    } as SanityPluginOptions,
+  admin: {
+    backendUrl: process.env.MEDUSA_BACKEND_URL,
+    vite: () => ({
+      optimizeDeps: {
+        include: sanityOptimizeDeps
+      }
+    }),
   },
+  plugins: [
+    {
+      resolve: "medusa-plugin-sanity",
+      options: {
+        api_token: process.env.SANITY_API_TOKEN,
+        project_id: process.env.SANITY_PROJECT_ID,
+        dataset: "development",
+        backend_url: process.env.MEDUSA_BACKEND_URL,
+        api_version: ...,
+        extra_schemas: {
+          "custom-model": {
+            schema: ...,
+            step: ...,
+            transformForCreate: ...,
+            transformForUpdate: ...,
+          }
+        }
+      } satisfies SanityPluginOptions
+    },
+  ]
 
 ```
+
+
 
 ## Extra schemas
 
@@ -65,3 +76,5 @@ The following is an example of the properties that need to be added to the plugi
 ## Known issues
 
 - Studio links and refreshes do not work, Medusa at the moment doesn't support catch-all routes in admin pages
+
+- Long loading time(5-10s instead of 1-2s), possibily because of the many optimizeDeps includes required

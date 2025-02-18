@@ -1,5 +1,5 @@
 {
-  "name": "medusa-plugin-sanity",
+  "name": "@steelrazor47/medusa-plugin-sanity",
   "version": "0.0.1",
   "description": "Medusa plugin for integration with Sanity CMS",
   "author": "Medusa (https://medusajs.com)",
