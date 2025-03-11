@@ -1,6 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
 import { MedusaError } from "@medusajs/framework/utils"
-import { schema } from "../../../../admin/lib/sanity/schemaTypes"
+import { schema } from "../../../../modules/sanity/schemaTypes"
 import { SANITY_MODULE } from "../../../../modules/sanity"
 import SanityModuleService from "../../../../modules/sanity/service"
 

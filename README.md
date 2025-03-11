@@ -25,22 +25,14 @@ Adds Sanity CMS integration to a Medusa V2 backend, closely following the Medusa
 ### Plugin options
 
 ```
-import { SanityPluginOptions, sanityOptimizeDeps } from "medusa-plugin-sanity/modules/sanity"
+import { SanityPluginOptions } from "medusa-plugin-sanity/modules/sanity"
 
 module.exports = defineConfig({
   ...
 
-  admin: {
-    backendUrl: process.env.MEDUSA_BACKEND_URL,
-    vite: () => ({
-      optimizeDeps: {
-        include: sanityOptimizeDeps
-      }
-    }),
-  },
   plugins: [
     {
-      resolve: "medusa-plugin-sanity",
+      resolve: "@steelrazor47/medusa-plugin-sanity",
       options: {
         api_token: process.env.SANITY_API_TOKEN,
         project_id: process.env.SANITY_PROJECT_ID,
@@ -76,5 +68,3 @@ The following is an example of the properties that need to be added to the plugi
 ## Known issues
 
 - Studio links and refreshes do not work, Medusa at the moment doesn't support catch-all routes in admin pages
-
-- Long loading time(5-10s instead of 1-2s), possibily because of the many optimizeDeps includes required
